@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Two-Way Compressed Message Editor</title>
+  <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
+  <style>
+    /* Global Styles */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      margin-top: 40px;
+      color: #333;
+      font-size: 2em;
+      text-align: center;
+    }
+
+    /* Textarea Styles */
+    #editor {
+      width: 90%;
+      height: 300px;
+      padding: 20px;
+      margin-top: 20px;
+      font-size: 16px;
+      line-height: 1.6;
+      border: 2px solid #4a90e2;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      resize: vertical;
+      background: #fff;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    #editor:focus {
+      border-color: #2c6cd1;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      outline: none;
+    }
+
+    /* URL Display Box */
+    #urlBox {
+      width: 90%;
+      margin-top: 20px;
+      padding: 15px 20px;
+      background: #e6f0ff;
+      border-left: 5px solid #4a90e2;
+      border-radius: 8px;
+      font-family: monospace;
+      word-break: break-all;
+      color: #333;
+    }
+
+    #urlBox span {
+      font-weight: bold;
+      color: #2c6cd1;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: auto;
+      padding: 20px;
+      text-align: center;
+      font-size: 0.9em;
+      color: #666;
+    }
+
+    a {
+      color: #4a90e2;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Share your thoughts</h1>
+
+  <textarea id="editor" placeholder="Type your message here..."></textarea>
+
+  <div id="urlBox">
+    URL ready to share: <span id="shareUrl">...</span>
+  </div>
+
+  <script>
+    const editor = document.getElementById('editor');
+    const shareUrl = document.getElementById('shareUrl');
+
+    // Get URL parameter
+    function getQueryParam(name) {
+      return new URLSearchParams(window.location.search).get(name);
+    }
+
+    // Load message from URL if present
+    const hash = getQueryParam('data');
+    if (hash) {
+      try {
+        const decompressed = LZString.decompressFromEncodedURIComponent(hash);
+        if (decompressed !== null) editor.value = decompressed;
+      } catch (e) {
+        console.error("Failed to decompress:", e);
+      }
+    }
+
+    // Update URL and share box
+    function updateURL(text) {
+      const compressed = LZString.compressToEncodedURIComponent(text);
+      const newURL = `${window.location.origin}${window.location.pathname}?data=${compressed}`;
+      history.replaceState(null, '', newURL);
+      shareUrl.textContent = newURL;
+    }
+
+    // Initialize URL box
+    updateURL(editor.value);
+
+    // Update as user types
+    editor.addEventListener('input', () => {
+      updateURL(editor.value);
+    });
+
+    // Handle back/forward buttons
+    window.addEventListener('popstate', () => {
+      const hash = getQueryParam('data');
+      if (hash) {
+        const decompressed = LZString.decompressFromEncodedURIComponent(hash);
+        editor.value = decompressed || '';
+        updateURL(editor.value);
+      }
+    });
+  </script>
+</body>
+
+</html>
