@@ -2,97 +2,233 @@
 <html lang="en">
 
 <head>
+  <link rel="icon" type="image/svg+xml" href="./notes.svg">
+  <link rel="icon" type="image/png" href="./notes.png">
   <meta charset="UTF-8">
-  <title>Two-Way Compressed Message Editor</title>
+  <title>Simple.Notes</title>
   <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
   <style>
-    /* Global Styles */
+    :root {
+      /* Color Palette */
+      --primary: #4a90e2;
+      --primary-dark: #2c6cd1;
+      --primary-light: #e6f0ff;
+      --primary-active: #dbe9ff;
+
+      --footer: #f59e0b;
+      --footer-hover: #d97706;
+
+      --bg-body: #f0f4f8;
+      --bg-surface: #ffffff;
+
+      --text-main: #333333;
+      --text-muted: #666666;
+
+      /* Effects */
+      --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 6px 12px rgba(0, 0, 0, 0.15);
+      --radius: 10px;
+      --transition: 0.3s ease;
+    }
+
+    /* --- Base Reset & Layout --- */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f0f4f8;
+      background: var(--bg-body);
+      color: var(--text-main);
       margin: 0;
-      padding: 0;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 100vh;
     }
 
     h1 {
-      margin-top: 40px;
-      color: #333;
-      font-size: 2em;
+      margin-top: 34px;
+      font-size: 2rem;
       text-align: center;
+      color: var(--text-main);
     }
 
-    /* Textarea Styles */
+    /* --- Main Editor (Textarea) --- */
     #editor {
       width: 90%;
-      height: 300px;
+      max-width: 1280px;
+      height: calc(75vh - 74px);
       padding: 20px;
       margin-top: 20px;
+
       font-size: 16px;
       line-height: 1.6;
-      border: 2px solid #4a90e2;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      background: var(--bg-surface);
+      color: var(--text-main);
+
+      border: 2px solid var(--primary);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
       resize: vertical;
-      background: #fff;
-      transition: border-color 0.3s, box-shadow 0.3s;
+      transition: border-color var(--transition), box-shadow var(--transition);
     }
 
     #editor:focus {
-      border-color: #2c6cd1;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
       outline: none;
+      border-color: var(--primary-dark);
+      box-shadow: var(--shadow-md);
     }
 
-    /* URL Display Box */
+    /* --- URL Display Box --- */
     #urlBox {
       width: 90%;
+      max-width: 1280px;
       margin-top: 20px;
       padding: 15px 20px;
-      background: #e6f0ff;
-      border-left: 5px solid #4a90e2;
+
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      background: var(--primary-light);
+      border-left: 5px solid var(--primary);
       border-radius: 8px;
+
       font-family: monospace;
-      word-break: break-all;
-      color: #333;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: background-color 0.2s;
     }
 
-    #urlBox span {
+    #urlBox:hover {
+      background: var(--primary-active);
+      color: var(--primary-dark);
+    }
+
+    #urlBox .label {
+      flex-shrink: 0;
+      color: var(--text-muted);
+    }
+
+    /* Truncation logic */
+    #shareUrl {
+      color: var(--primary-dark);
       font-weight: bold;
-      color: #2c6cd1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    /* Footer */
+    /* --- Footer --- */
     footer {
+      width: 100%;
       margin-top: auto;
-      padding: 20px;
+      padding: 24px 20px;
+
       text-align: center;
       font-size: 0.9em;
-      color: #666;
+      line-height: 1.6;
     }
 
-    a {
-      color: #4a90e2;
+    footer a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      color: var(--footer);
       text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    footer a:hover {
+      color: var(--footer-hover);
+    }
+
+    /* Unified SVG Styles */
+    svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      fill: currentColor;
+      stroke: currentColor;
     }
   </style>
 </head>
 
 <body>
-  <h1>Share your thoughts</h1>
+  <svg style="display:none;">
+    <symbol id="icon-share" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M20.9983 10C20.9862 7.82497 20.8897 6.64706 20.1213 5.87868C19.2426 5 17.8284 5 15 5H12C9.17157 5 7.75736 5 6.87868 5.87868C6 6.75736 6 8.17157 6 11V16C6 18.8284 6 20.2426 6.87868 21.1213C7.75736 22 9.17157 22 12 22H15C17.8284 22 19.2426 22 20.1213 21.1213C21 20.2426 21 18.8284 21 16V15"
+        stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+      <path
+        d="M3 10V16C3 17.6569 4.34315 19 6 19M18 5C18 3.34315 16.6569 2 15 2H11C7.22876 2 5.34315 2 4.17157 3.17157C3.51839 3.82475 3.22937 4.69989 3.10149 6"
+        stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+    </symbol>
+
+    <symbol id="icon-coffee" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M3.62662 16.3991C3.80361 19.054 3.89211 20.3815 4.75712 21.1907C5.62212 22 6.95253 22 9.61333 22H10.3867C13.0475 22 14.3779 22 15.2429 21.1907C16.1079 20.3815 16.1964 19.054 16.3734 16.3991L16.7156 11.2661C16.8489 9.26687 16.9155 8.26726 16.3227 7.63363C15.7299 7 14.7281 7 12.7245 7H7.27555C5.27191 7 4.27009 7 3.67729 7.63363C3.08449 8.26726 3.15113 9.26687 3.28441 11.2661L3.34221 12.133"
+        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+      <path d="M17 17H18C20.2091 17 22 15.2091 22 13C22 10.7909 20.2091 9 18 9H17" stroke="currentColor"
+        stroke-width="1.5" />
+      <path
+        d="M10 18.75C10.4142 18.75 10.75 18.4142 10.75 18C10.75 17.5858 10.4142 17.25 10 17.25V18.75ZM13.5 17.25C13.0858 17.25 12.75 17.5858 12.75 18C12.75 18.4142 13.0858 18.75 13.5 18.75V17.25ZM10 17.25H4V18.75H10V17.25ZM16 17.25H13.5V18.75H16V17.25Z"
+        stroke="currentColor" stroke-width="1" stroke-linecap="round" />
+      <path
+        d="M6.05081 5.0614L6.46143 4.48574C6.6882 4.16781 6.61431 3.72623 6.29638 3.49945C5.97845 3.27267 5.90455 2.8311 6.13133 2.51317L6.54195 1.9375M14.0508 5.0614L14.4614 4.48574C14.6882 4.16781 14.6143 3.72623 14.2964 3.49945C13.9784 3.27267 13.9046 2.8311 14.1313 2.51317L14.5419 1.9375M10.0508 5.0614L10.4614 4.48574C10.6882 4.16781 10.6143 3.72623 10.2964 3.49945C9.97845 3.27267 9.90455 2.8311 10.1313 2.51317L10.5419 1.9375"
+        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+    </symbol>
+
+  </svg>
+
+
+  <h1>Simple Notes</h1>
 
   <textarea id="editor" placeholder="Type your message here..."></textarea>
 
   <div id="urlBox">
-    URL ready to share: <span id="shareUrl">...</span>
+    <svg>
+      <use href="#icon-share"></use>
+    </svg>
+    <span class="label">URL ready to share:</span>
+    <span id="shareUrl">...</span>
   </div>
+
+  <footer>
+    <a href="https://buymeacoffee.com/simple.notes" target="_blank" rel="noopener">
+      <svg>
+        <use href="#icon-coffee"></use>
+      </svg>
+      Buy me a coffee
+    </a>
+  </footer>
 
   <script>
     const editor = document.getElementById('editor');
     const shareUrl = document.getElementById('shareUrl');
+    const urlBox = document.getElementById('urlBox');
+
+    // Copy to clipboard on click
+    urlBox.addEventListener('click', async () => {
+      const textToCopy = shareUrl.textContent;
+
+      try {
+        await navigator.clipboard.writeText(textToCopy);
+
+        // Optional visual feedback
+        const originalText = shareUrl.textContent;
+        shareUrl.textContent = 'Copied!';
+        setTimeout(() => {
+          shareUrl.textContent = originalText;
+        }, 1200);
+      } catch (err) {
+        console.error('Copy failed:', err);
+      }
+    });
 
     // Get URL parameter
     function getQueryParam(name) {

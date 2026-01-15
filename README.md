@@ -11,7 +11,7 @@ Simple Notes is a minimal web app that lets anyone create and share notes easily
 
 ## Usage
 
-1. Open `index.html` in your browser.
+1. Open [`https://aabelkhiria.github.io/simple.notes`](https://aabelkhiria.github.io/simple.notes) in your browser.
 2. Type your message in the textarea.
 3. The URL automatically updates. Share the URL with anyone.
 4. Opening a URL with `?data=<compressed>` will automatically load the message.
